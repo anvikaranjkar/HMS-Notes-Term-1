@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HMS AT1 — Anvi's Crash Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--surface:#13161e;--surface2:#1a1e28;--border:#ffffff12;--border2:#ffffff20;--text:#eef0f5;--muted:#7c8499;--accent:#7eb8f7;--green:#5ecfa4;--amber:#f4b860;--red:#f27b7b;--pink:#e580c8;--r:10px;--r2:14px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:230px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding-bottom:1rem}
+.logo{padding:1.25rem 1rem 1rem;border-bottom:1px solid var(--border);margin-bottom:.5rem}
+.logo-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--accent);line-height:1.2}
+.logo-sub{font-size:11px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace}
+.countdown-chip{margin:0 .75rem .75rem;background:linear-gradient(135deg,#1e2a3a,#1a2030);border:1px solid #3a5070;border-radius:var(--r);padding:8px 10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);text-align:center}
+.countdown-chip .cd-label{color:var(--muted);font-size:10px;display:block;margin-bottom:2px}
+.countdown-chip .cd-time{font-size:16px;font-weight:500;letter-spacing:.05em}
+.nav-section{padding:0 .5rem;margin-bottom:.25rem}
+.nav-section-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:.5rem .5rem .25rem}
+.nav-btn{width:100%;display:flex;align-items:center;gap:8px;padding:7px 10px;border:none;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:13px;border-radius:var(--r);cursor:pointer;text-align:left;transition:background .15s,color .15s}
+.nav-btn:hover{background:var(--surface2);color:var(--text)}
+.nav-btn.active{background:#1e3a5c;color:var(--accent);font-weight:500}
+.nav-btn .dot{width:6px;height:6px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.nav-btn.active .dot{background:var(--accent)}
+.nav-btn .hot-badge{margin-left:auto;font-size:9px;background:#3a2010;color:var(--amber);border-radius:4px;padding:1px 5px;font-family:'DM Mono',monospace}
+.nav-btn .marks{margin-left:auto;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace}
+.nav-btn .skip-badge{margin-left:auto;font-size:9px;background:#1a2a1a;color:#4a7a4a;border-radius:4px;padding:1px 5px;font-family:'DM Mono',monospace}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem}
+.topbar-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--text);flex:1}
+.api-row{display:flex;align-items:center;gap:8px}
+.api-input{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:6px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;width:200px;outline:none;transition:border .2s}
+.api-input:focus{border-color:var(--accent)}
+.api-input::placeholder{color:var(--muted)}
+.api-status{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
+.api-status.ok{background:var(--green)}
+
+/* PAGES */
+.page{display:none;padding:1.5rem;max-width:860px;animation:fadeIn .2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;font-size:10px;font-family:'DM Mono',monospace;padding:2px 7px;border-radius:4px;font-weight:500}
+.badge-blue{background:#1a3a5c;color:var(--accent)}
+.badge-green{background:#0e2e20;color:var(--green)}
+.badge-amber{background:#2e1e08;color:var(--amber)}
+.badge-red{background:#2e1010;color:var(--red)}
+
+/* META */
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:1rem}
+.meta-cell{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px}
+.meta-key{font-size:10px;color:var(--muted);margin-bottom:2px;font-family:'DM Mono',monospace}
+.meta-val{font-size:13px;font-weight:500;color:var(--text)}
+
+/* SEC LABEL */
+.sec-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:1rem 0 .4rem;font-family:'DM Mono',monospace}
+
+/* LISTS */
+.pts{list-style:none;padding:0}
+.pts li{font-size:13.5px;color:#c5cad8;padding:5px 0 5px 18px;position:relative;border-bottom:1px solid var(--border);line-height:1.55}
+.pts li:last-child{border-bottom:none}
+.pts li::before{content:"›";position:absolute;left:0;color:var(--accent);font-weight:600}
+.pts li strong{color:var(--text)}
+.pts li .hl{color:var(--amber);font-weight:500}
+.pts li .green{color:var(--green);font-weight:500}
+
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tag{font-size:11px;padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;border:1px solid}
+.tag-stat{background:#2a1e06;color:var(--amber);border-color:#3a2e0a}
+.tag-phrase{background:#0e2820;color:var(--green);border-color:#0e3820}
+.tag-example{background:#1a2030;color:var(--accent);border-color:#2a3050}
+.tag-red{background:#2a1010;color:var(--red);border-color:#3a1515}
+
+/* TIP + IMPL */
+.tip-box{background:#121a2a;border-left:2px solid var(--accent);border-radius:0 var(--r) var(--r) 0;padding:10px 14px;font-size:12.5px;color:#9ab5d0;margin-top:.75rem;line-height:1.55}
+.impl-box{background:#0e2218;border:1px solid #1a4030;border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--green);margin:6px 0;font-style:italic;line-height:1.5}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0e1e32,#13161e);border:1px solid #2a3a50;border-radius:var(--r2);padding:1.5rem;margin-bottom:1rem;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#7eb8f720 0%,transparent 70%);pointer-events:none}
+.hero-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--accent);line-height:1.2}
+.hero-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:1rem}
+.hero-chip{background:#1a2030;border:1px solid var(--border2);border-radius:var(--r);padding:5px 12px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace}
+.hero-chip span{color:var(--accent)}
+
+/* COMBOS */
+.combo-list{font-family:'DM Mono',monospace;font-size:12px}
+.combo-row{padding:6px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;color:var(--muted)}
+.combo-row:last-child{border-bottom:none}
+.combo-row.hot{color:var(--text)}
+.combo-row .star{color:var(--amber);font-size:14px}
+.combo-row .qs{flex:1}
+.combo-row .mark{color:var(--accent)}
+
+/* ACRO */
+.acro-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.acro-pill{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:6px 12px;font-size:12px}
+.acro-pill strong{color:var(--accent)}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:1rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:1rem}
+.stat-number{font-family:'DM Serif Display',serif;font-size:28px;color:var(--accent);line-height:1;margin-bottom:4px}
+.stat-desc{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* Q7 SKIP CARD */
+.skip-card{background:#0d1a0d;border:1px solid #1a3a1a;border-radius:var(--r2);padding:1.25rem;margin-bottom:1rem}
+.skip-card .skip-title{font-size:13px;font-weight:600;color:#4a8a4a;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+.skip-card .pts li{color:#7aaa7a}
+.skip-card .pts li::before{color:#4a8a4a}
+.skip-card .sec-label{color:#4a8a4a}
+
+/* AI */
+.q-select{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;padding:7px 12px;outline:none;cursor:pointer;width:100%;margin-bottom:.75rem}
+.q-select:focus{border-color:var(--accent)}
+.q-select option{background:#1a1e28}
+.response-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);font-family:'Outfit',sans-serif;font-size:13.5px;padding:12px 14px;resize:vertical;min-height:140px;outline:none;transition:border .2s;line-height:1.6}
+.response-input:focus{border-color:var(--accent)}
+.response-input::placeholder{color:var(--muted)}
+.ai-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:var(--r);font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:opacity .15s,transform .1s}
+.ai-btn:active{transform:scale(.98)}
+.ai-btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#0a1420}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.btn-primary:hover:not(:disabled){background:#9dcafc}
+.btn-row{display:flex;gap:8px;margin-top:.75rem;flex-wrap:wrap}
+.ai-result{margin-top:1rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;display:none}
+.ai-result.visible{display:block}
+.ai-result-header{background:#0e1e30;padding:8px 14px;font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;display:flex;align-items:center;gap:8px}
+.ai-result-body{padding:1rem 1.25rem;font-size:13.5px;line-height:1.7;color:#c5cad8;white-space:pre-wrap}
+
+/* CHAT */
+.chat-outer{display:flex;flex-direction:column;height:calc(100vh - 57px)}
+.chat-messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem}
+.msg{display:flex;gap:10px;max-width:80%;animation:fadeIn .2s ease}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;margin-top:2px}
+.msg.user .msg-avatar{background:#1e3a5c;color:var(--accent)}
+.msg.ai .msg-avatar{background:#0e2818;color:var(--green)}
+.msg-bubble{padding:10px 14px;border-radius:var(--r2);font-size:13.5px;line-height:1.65;white-space:pre-wrap}
+.msg.user .msg-bubble{background:#1e3a5c;color:var(--text);border-radius:var(--r2) 4px var(--r2) var(--r2)}
+.msg.ai .msg-bubble{background:var(--surface);border:1px solid var(--border);color:#c5cad8;border-radius:4px var(--r2) var(--r2) var(--r2)}
+.chat-input-bar{border-top:1px solid var(--border);padding:1rem 1.5rem;display:flex;gap:10px;background:var(--bg)}
+.chat-input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:'Outfit',sans-serif;font-size:13.5px;padding:10px 14px;outline:none;resize:none;height:44px;transition:border .2s}
+.chat-input:focus{border-color:var(--accent)}
+
+/* LOADING */
+.loading-dots{display:inline-flex;gap:4px;align-items:center}
+.loading-dots span{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:bounce 1.2s infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.5}40%{transform:scale(1);opacity:1}}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* MOBILE */
+@media(max-width:700px){
+  .sidebar{width:100%;height:auto;flex-direction:row;flex-wrap:wrap;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border)}
+  .shell{flex-direction:column;height:auto}
+  .main{height:auto}
+  .page{padding:1rem}
+  .api-input{width:140px}
+  .logo,.countdown-chip{display:none}
+  .nav-section{display:flex;gap:4px;padding:.5rem}
+  .nav-section-label{display:none}
+  .nav-btn{white-space:nowrap;flex-shrink:0;width:auto;padding:5px 10px;font-size:12px}
+  .nav-btn .dot{display:none}
+  .nav-btn .marks,.nav-btn .hot-badge,.nav-btn .skip-badge{display:none}
+  .chat-outer{height:calc(100vh - 120px)}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-title">HMS AT1<br>Crash Prep</div>
+    <div class="logo-sub">anvi · year 11 · 2026</div>
+  </div>
+  <div class="countdown-chip">
+    <span class="cd-label">exam in</span>
+    <div class="cd-time" id="countdown">--:--:--</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">main</div>
+    <button class="nav-btn active" data-page="overview"><span class="dot"></span>overview<span class="hot-badge">start here</span></button>
+    <button class="nav-btn" data-page="assess"><span class="dot"></span>ai assessor</button>
+    <button class="nav-btn" data-page="chat"><span class="dot"></span>ai tutor chat</button>
+    <button class="nav-btn" data-page="stats"><span class="dot"></span>stats + acronyms</button>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">KIQ 1</div>
+    <button class="nav-btn" data-page="q1"><span class="dot"></span>Q1 — dimensions<span class="marks">3m</span></button>
+    <button class="nav-btn" data-page="q2"><span class="dot"></span>Q2 — epidemiology<span class="marks">3m</span></button>
+    <button class="nav-btn" data-page="q3"><span class="dot"></span>Q3 — social justice<span class="hot-badge">⭐ hot</span></button>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">KIQ 2</div>
+    <button class="nav-btn" data-page="q4"><span class="dot"></span>Q4 — generations<span class="marks">6m</span></button>
+    <button class="nav-btn" data-page="q5"><span class="dot"></span>Q5 — determinants<span class="marks">6m</span></button>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">KIQ 3</div>
+    <button class="nav-btn" data-page="q6a"><span class="dot"></span>Q6A — nature/extent<span class="marks">4m</span></button>
+    <button class="nav-btn" data-page="q6b"><span class="dot"></span>Q6B — risk/protect<span class="marks">4m</span></button>
+    <button class="nav-btn" data-page="q7"><span class="dot"></span>Q7 — skills<span class="skip-badge">low priority</span></button>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">KIQ 4</div>
+    <button class="nav-btn" data-page="q8"><span class="dot"></span>Q8 — orgs<span class="marks">6m</span></button>
+    <button class="nav-btn" data-page="q9"><span class="dot"></span>Q9 — approaches<span class="hot-badge">⭐ 8m</span></button>
+    <button class="nav-btn" data-page="q10"><span class="dot"></span>Q10 — SDGs<span class="hot-badge">⭐ hot</span></button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Overview</div>
+    <div class="api-row">
+      <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Gemini API</span>
+      <input class="api-input" type="password" id="api-key-input" placeholder="paste API key…" autocomplete="off">
+      <div class="api-status" id="api-status"></div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="page active" id="page-overview">
+    <div class="hero">
+      <div class="hero-title">Health for Individuals<br>& Communities</div>
+      <div class="hero-sub">Year 11 AT1 · Wednesday 22 April 2026 · 8:15 am · exactly 20 marks</div>
+      <div class="hero-chips">
+        <div class="hero-chip"><span>20</span> exact marks</div>
+        <div class="hero-chip"><span>~40</span> minutes</div>
+        <div class="hero-chip"><span>3–6</span> questions</div>
+        <div class="hero-chip"><span>2 min</span> per mark</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">most likely 20-mark combinations <span class="badge badge-amber">memorise these</span></div>
+      <div class="combo-list">
+        <div class="combo-row hot"><span class="star">⭐</span><span class="qs">Q3(6) + Q4(6) + Q6A(4) + Q10(4)</span><span class="mark">= 20 · ALL 4 KIQs</span></div>
+        <div class="combo-row hot"><span class="star">⭐</span><span class="qs">Q3(6) + Q5(6) + Q6A(4) + Q10(4)</span><span class="mark">= 20 · ALL 4 KIQs</span></div>
+        <div class="combo-row hot"><span class="star">⭐</span><span class="qs">Q3(6) + Q4(6) + Q6B(4) + Q10(4)</span><span class="mark">= 20 · ALL 4 KIQs</span></div>
+        <div class="combo-row hot"><span class="star">⭐</span><span class="qs">Q3(6) + Q5(6) + Q6B(4) + Q10(4)</span><span class="mark">= 20 · ALL 4 KIQs</span></div>
+        <div class="combo-row"><span class="star" style="opacity:0">⭐</span><span class="qs">Q1(3) + Q2(3) + Q4(6) + Q6A(4) + Q10(4)</span><span class="mark">= 20</span></div>
+        <div class="combo-row"><span class="star" style="opacity:0">⭐</span><span class="qs">Q3(6) + Q7(8) + Q8(6)</span><span class="mark">= 20</span></div>
+        <div class="combo-row"><span class="star" style="opacity:0">⭐</span><span class="qs">Q4(6) + Q7(8) + Q8(6)</span><span class="mark">= 20</span></div>
+      </div>
+      <div class="tip-box">Q3 appears in 8 of top 10 combos — near-certain. Q10 in 7. Study those first.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">the 4 key terms</div>
+      <ul class="pts">
+        <li><strong>DESCRIBE</strong> — features + examples. Don't explain why. Used in <span class="hl">Q1, Q6A</span></li>
+        <li><strong>OUTLINE</strong> — brief overview of all parts + stat each. Used in <span class="hl">Q2</span></li>
+        <li><strong>EXPLAIN</strong> — HOW one thing causes another (cause + effect). Used in <span class="hl">Q3, Q4, Q5, Q6B, Q8, Q10</span></li>
+        <li><strong>ANALYSE</strong> — depth + implications. Every body para ends: <span class="green">"An implication of this is…"</span> Used in <span class="hl">Q7, Q9</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">your teacher's fix list <span class="badge badge-red">from draft feedback</span></div>
+      <ul class="pts">
+        <li>Q3 — add <strong>PARTICIPATION</strong> — it was missing from your draft</li>
+        <li>Q4 — name generations: <strong>Baby Boomers, Gen X, Gen Z</strong></li>
+        <li>Q5 — every example must say "a young person" or "a 16-year-old…"</li>
+        <li>Q6A — statistics ARE your examples (1 in 4, 75%, AIHW)</li>
+        <li>Q7 + Q9 — end EVERY body para with <span class="green">"An implication of this is…"</span></li>
+        <li>Q8 — every sentence must link back to young people specifically</li>
+        <li>Q10 — name a specific local community (rural NSW, western Sydney, ATSI)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- AI ASSESSOR -->
+  <div class="page" id="page-assess">
+    <div class="card">
+      <div class="card-title">ai response assessor <span class="badge badge-green">powered by gemini</span></div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:1rem">Select a question, paste your practice answer, and Gemini will mark it and give specific feedback.</p>
+      <select class="q-select" id="assess-q-select">
+        <option value="">— select a question —</option>
+        <option value="q1">Q1 · Describe physical & social dimensions (3 marks)</option>
+        <option value="q2">Q2 · Outline measures of epidemiology (3 marks)</option>
+        <option value="q3">Q3 · Explain social justice principles (6 marks)</option>
+        <option value="q4">Q4 · Explain changes in young people's lives (6 marks)</option>
+        <option value="q5">Q5 · Explain determinants + meaning of health (6 marks)</option>
+        <option value="q6a">Q6A · Describe nature & extent of health issue (4 marks)</option>
+        <option value="q6b">Q6B · Explain risk & protective factors (4 marks)</option>
+        <option value="q7">Q7 · Analyse three skills for the individual (8 marks)</option>
+        <option value="q8">Q8 · Explain role of govt, NGOs & communities (6 marks)</option>
+        <option value="q9">Q9 · Analyse three approaches to health (8 marks)</option>
+        <option value="q10">Q10 · Explain two SDGs for local community (4 marks)</option>
+      </select>
+      <textarea class="response-input" id="assess-input" placeholder="Paste or type your practice response here…"></textarea>
+      <div class="btn-row">
+        <button class="ai-btn btn-primary" id="assess-btn" onclick="assessResponse()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+          mark my response
+        </button>
+        <button class="ai-btn btn-secondary" onclick="document.getElementById('assess-input').value=''">clear</button>
+      </div>
+      <div class="ai-result" id="assess-result">
+        <div class="ai-result-header">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          gemini feedback
+        </div>
+        <div class="ai-result-body" id="assess-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="page" id="page-chat">
+    <div class="chat-outer">
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg ai">
+          <div class="msg-avatar">AI</div>
+          <div class="msg-bubble">Hey Anvi! I'm your HMS AT1 tutor. I know all 10 questions, marking guidelines, your teacher's feedback and every model answer.
+
+Try asking:
+• "Explain PEAR to me simply"
+• "What's the difference between explain and analyse?"
+• "Quiz me on Q3"
+• "What stats do I need for Q6A?"
+• "Write me an implication sentence for Q9"
+• "What are the 5 Ottawa Charter action areas?"</div>
+        </div>
+      </div>
+      <div class="chat-input-bar">
+        <textarea class="chat-input" id="chat-input" placeholder="Ask anything about the content…" rows="1" onkeydown="handleChatKey(event)"></textarea>
+        <button class="ai-btn btn-primary" onclick="sendChat()" style="height:44px;padding:0 16px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="page" id="page-stats">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-number">1 in 4</div><div class="stat-desc">young Australians (16–24) have a mental health condition per year (AIHW)</div></div>
+      <div class="stat-card"><div class="stat-number">#1</div><div class="stat-desc">Suicide = leading cause of death, Australians aged 15–24</div></div>
+      <div class="stat-card"><div class="stat-number">75%</div><div class="stat-desc">of all mental health conditions develop before age 25</div></div>
+      <div class="stat-card"><div class="stat-number">83 yrs</div><div class="stat-desc">Australian life expectancy, one of world's highest</div></div>
+      <div class="stat-card"><div class="stat-number">~3</div><div class="stat-desc">per 1,000 live births — Australia's infant mortality rate</div></div>
+      <div class="stat-card"><div class="stat-number">27%</div><div class="stat-desc">of all deaths = cardiovascular disease, Australia's leading cause of mortality</div></div>
+      <div class="stat-card"><div class="stat-number">30%→12%</div><div class="stat-desc">Adult smoking decline since 1980s — Quit campaign (behavioural approach)</div></div>
+      <div class="stat-card"><div class="stat-number">150+</div><div class="stat-desc">headspace centres nationally, free/low-cost for 12–25 year olds</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">acronyms</div>
+      <div class="sec-label">Q3 — PEAR</div>
+      <div class="acro-grid">
+        <div class="acro-pill"><strong>P</strong>articipation</div>
+        <div class="acro-pill"><strong>E</strong>quity</div>
+        <div class="acro-pill"><strong>A</strong>ccess</div>
+        <div class="acro-pill"><strong>R</strong>ights</div>
+      </div>
+      <div class="sec-label">Q9 — approaches to health</div>
+      <div class="acro-grid">
+        <div class="acro-pill"><strong>B</strong>iomedical</div>
+        <div class="acro-pill"><strong>B</strong>ehavioural / lifestyle</div>
+        <div class="acro-pill"><strong>S</strong>ocioenvironmental</div>
+      </div>
+      <div class="sec-label">Q9 — Ottawa Charter 5 action areas (1986)</div>
+      <div class="acro-grid">
+        <div class="acro-pill">healthy public <strong>P</strong>olicy</div>
+        <div class="acro-pill">supportive <strong>E</strong>nvironments</div>
+        <div class="acro-pill"><strong>C</strong>ommunity action</div>
+        <div class="acro-pill">personal <strong>S</strong>kills</div>
+        <div class="acro-pill">reorient health <strong>S</strong>ervices</div>
+      </div>
+      <div class="sec-label">Q10 — SDGs</div>
+      <div class="acro-grid">
+        <div class="acro-pill">SDG <strong>3</strong> — good health + wellbeing</div>
+        <div class="acro-pill">SDG <strong>4</strong> — quality education</div>
+        <div class="acro-pill">SDG <strong>10</strong> — reduced inequalities</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="page" id="page-q1">
+    <div class="card">
+      <div class="card-title">Q1 — physical & social dimensions of health</div>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="meta-key">key term</div><div class="meta-val">DESCRIBE = features + examples</div></div>
+        <div class="meta-cell"><div class="meta-key">marks + time</div><div class="meta-val">3 marks · 6 minutes</div></div>
+        <div class="meta-cell"><div class="meta-key">structure</div><div class="meta-val">2 paragraphs</div></div>
+      </div>
+      <div class="sec-label">para 1 — physical</div>
+      <ul class="pts">
+        <li>Functioning of the body: fitness, body weight, energy, freedom from disease/injury, daily task capacity</li>
+        <li>Example: 16-year-old who plays sport + no chronic illness = <strong>high physical health status</strong></li>
+        <li>Contrast: obesity or asthma = lower physical health status</li>
+        <li>End: <span class="hl">"demonstrating how the physical dimension determines health status"</span></li>
+      </ul>
+      <div class="sec-label">para 2 — social</div>
+      <ul class="pts">
+        <li>Quality of relationships + sense of connection: friendships, family support, belonging, community</li>
+        <li>Example: close family + active social life = higher health status, manages stress better</li>
+        <li>Contrast: social isolation = poor health outcomes, limited coping</li>
+        <li>End: <span class="hl">"demonstrating how social dimension directly determines health status"</span></li>
+      </ul>
+      <div class="tip-box">Both dimensions must link to "determining health status" — don't just define them.</div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="page" id="page-q2">
+    <div class="card">
+      <div class="card-title">Q2 — measures of epidemiology</div>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="meta-key">key term</div><div class="meta-val">OUTLINE = all 4 measures briefly</div></div>
+        <div class="meta-cell"><div class="meta-key">marks + time</div><div class="meta-val">3 marks · 6 minutes</div></div>
+        <div class="meta-cell"><div class="meta-key">structure</div><div class="meta-val">1 paragraph, all 4 measures</div></div>
+      </div>
+      <div class="sec-label">all 4 required for 3/3</div>
+      <ul class="pts">
+        <li><strong>Mortality</strong> — rate of deaths from a cause. Aus: cardiovascular disease = ~27% of all deaths</li>
+        <li><strong>Morbidity</strong> — rate of illness/disease. Aus: mental health + arthritis most common</li>
+        <li><strong>Infant mortality rate</strong> — deaths under 1 per 1,000 live births. Aus: ~3 per 1,000</li>
+        <li><strong>Life expectancy</strong> — average years expected to live. Aus: ~83 years, one of world's highest</li>
+      </ul>
+      <div class="tags">
+        <span class="tag tag-stat">27% CVD deaths</span><span class="tag tag-stat">~3/1000 infant mortality</span><span class="tag tag-stat">~83 yrs life expectancy</span>
+      </div>
+      <div class="tip-box">Open with: "Epidemiology is the study of patterns, causes, and effects of health conditions across populations…"</div>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="page" id="page-q3">
+    <div class="card">
+      <div class="card-title">Q3 — social justice principles <span class="badge badge-amber">near-certain ⭐</span></div>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="meta-key">key term</div><div class="meta-val">EXPLAIN = HOW each promotes health</div></div>
+        <div class="meta-cell"><div class="meta-key">marks + time</div><div class="meta-val">6 marks · 12 minutes</div></div>
+        <div class="meta-cell"><div class="meta-key">acronym</div><div class="meta-val">PEAR</div></div>
+        <div class="meta-cell"><div class="meta-key">structure</div><div class="meta-val">3 paragraphs</div></div>
+      </div>
+      <div class="sec-label">para 1 — equity + access (package together)</div>
+      <ul class="pts">
+        <li><strong>Equity</strong> = resources by NEED not equally. <strong>Access</strong> = everyone can reach services financially + physically</li>
+        <li>Example: <span class="hl">Medicare</span> — subsidised healthcare regardless of income</li>
+        <li>Individual: low-income young person can see GP + access psychology (Better Access Initiative)</li>
+        <li>Community: reduces health inequalities, outcomes not determined solely by wealth</li>
+      </ul>
+      <div class="sec-label">para 2 — participation <span class="badge badge-red">was missing from your draft!</span></div>
+      <ul class="pts">
+        <li>Right to be involved in decisions that affect your health</li>
+        <li>Example: <span class="hl">Close the Gap</span> — ATSI communities co-design their own health services</li>
+        <li>Individual: young person involved in own treatment plan → more engaged → better outcomes</li>
+        <li>Community: builds social cohesion + shared ownership of health</li>
+      </ul>
+      <div class="sec-label">para 3 — rights</div>
+      <ul class="pts">
+        <li>Entitlement to highest health standard, free from discrimination</li>
+        <li>Example: <span class="hl">NDIS</span> — upholds rights of people with disabilities to access support</li>
+        <li>Individual: minority groups access care without fear/stigma → seek help earlier</li>
+        <li>Community: anti-discrimination laws + culturally safe services → whole community benefits</li>
+      </ul>
+      <div class="tip-box">Every principle MUST link to BOTH individual AND community health status. That's the 6/6 requirement.</div>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="page" id="page-q4">
+    <div class="card">
+      <div class="card-title">Q4 — changes in young people's lives over generations</div>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="meta-key">key term</div><div class="meta-val">EXPLAIN = change → health outcome</div></div>
+        <div class="meta-cell"><div class="meta-key">marks + time</div><div class="meta-val">6 marks · 12 minutes</div></div>
+        <div class="meta-cell"><div class="meta-key">teacher fix</div><div class="meta-val">Name generations: Boomers / Gen X / Gen Z</div></div>
+      </div>
+      <div class="sec-label">para 1 — technology + social media</div>
+      <ul class="pts">
+        <li>Unlike <strong>Baby Boomers/Gen X</strong> (no smartphones) → <strong>Gen Z</strong> exposed 24/7 to comparison culture, cyberbullying, unrealistic body image</li>
+        <li>Health outcome: 1 in 4 young Australians (16–24) have a mental health condition — linked to social media</li>
+        <li>Sedentary screens → less physical activity than previous generations → higher obesity + chronic disease risk</li>
+      </ul>
+      <div class="sec-label">para 2 — family, academic pressure + diet</div>
+      <ul class="pts">
+        <li>Baby Boomers: single-income households, accessible housing. Gen Z: dual-income/single-parent, housing unaffordable</li>
+        <li>Less parental supervision → lower social support → worse mental + social health</li>
+        <li>Academic pressure (HSC/ATAR) → chronic stress → rising anxiety + sleep deprivation</li>
+        <li>More ultra-processed food vs home-cooked → poor nutrition → Type 2 diabetes risk rising</li>
+      </ul>
+      <div class="tags">
+        <span class="tag tag-phrase">unlike Baby Boomers…</span><span class="tag tag-phrase">compared to Gen X…</span><span class="tag tag-phrase">this has led to…</span><span class="tag tag-phrase">contributing to…</span>
+      </div>
+      <div class="tip-box">Every change MUST be followed by its specific health outcome. Change → effect. That's EXPLAIN.</div>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="page" id="page-q5">
+    <div class="card">
+      <div class="card-title">Q5 — determinants of health + young person's meaning</div>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="meta-key">key term</div><div class="meta-val">EXPLAIN = HOW determinants shape meaning</div></div>
+        <div class="meta-cell"><div class="meta-key">marks + time</div><div class="meta-val">6 marks · 12 minutes</div></div>
+        <div class="meta-cell"><div class="meta-key">structure</div><div class="meta-val">3 paras: individual / SES / environmental</div></div>
+      </div>
+      <div class="sec-label">para 1 — individual determinants</div>
+      <ul class="pts">
+        <li>Knowledge, attitudes, skills, gender, genetics</li>
+        <li>High health literacy (PDHPE) → holistic meaning = physical + mental + social all together</li>
+        <li>Contrast: young person with Type 1 diabetes → health means "managing my condition" (narrower)</li>
+      </ul>
+      <div class="sec-label">para 2 — socioeconomic determinants</div>
+      <ul class="pts">
+        <li>SES, education, employment, cultural background</li>
+        <li>High-SES young person: health = active, multidimensional, optimised life</li>
+        <li>Low-SES young person: can't afford GP/food → health = "not being sick" (survival meaning)</li>
+        <li>Cultural stigma: may exclude mental health from meaning entirely</li>
+      </ul>
+      <div class="sec-label">para 3 — environmental determinants</div>
+      <ul class="pts">
+        <li>Geographic location, access to resources, community safety</li>
+        <li>Urban Sydney: parks + clubs + services → health = active, purposeful, rich life</li>
+        <li>Rural/remote: no GP for hours → health = "able to function physically"</li>
+        <li>ATSI young people: connection to Country + community = central to health meaning</li>
+      </ul>
+      <div class="tip-box">This is about MEANING — not just what affects health, but how determinants change what health IS to a young person. Use contrasting examples.</div>
+    </div>
+  </div>
+
+  <!-- Q6A -->
+  <div class="page" id="page-q6a">
+    <div class="card">
+      <div class="card-title">Q6A — nature + extent of a health issue</div>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="meta-key">key term</div><div class="meta-val">DESCRIBE = nature + extent (stats)</div></div>
+        <div class="meta-cell"><div class="meta-key">marks + time</div><div class="meta-val">4 marks · 8 minutes</div></div>
+        <div class="meta-cell"><div class="meta-key">your issue</div><div class="meta-val">Mental health (anxiety + depression)</div></div>
+      </div>
+      <div class="sec-label">para 1 — nature</div>
+      <ul class="pts">
+        <li>Clinically significant disruptions to how a person thinks, feels, functions daily</li>
+        <li>Anxiety: persistent worry, racing heart, shortness of breath, avoidance behaviours</li>
+        <li>Depression: low mood 2+ weeks, loss of interest, disrupted sleep/appetite, fatigue, social withdrawal</li>
+        <li>Affects ALL dimensions: physical, social, academic performance, sense of identity</li>
+      </ul>
+      <div class="sec-label">para 2 — extent (statistics = examples)</div>
+      <ul class="pts">
+        <li><span class="hl">1 in 4</span> young Australians (16–24) have a diagnosable mental health condition per year (AIHW)</li>
+        <li>Suicide = leading cause of death aged 15–24; young males at <span class="hl">3x risk</span></li>
+        <li><span class="hl">75%</span> of all mental health conditions develop before age 25</li>
+        <li>headspace reported record demand post-COVID-19</li>
+      </ul>
+      <div class="tags">
+        <span class="tag tag-stat">1 in 4 · AIHW</span><span class="tag tag-stat">suicide #1 cause 15–24</span><span class="tag tag-stat">75% before 25</span><span class="tag tag-stat">3x risk young males</span>
+      </div>
+      <div class="tip-box">No stats = can't get 4/4. Statistics ARE your examples here. Quote specific numbers and name AIHW.</div>
+    </div>
+  </div>
+
+  <!-- Q6B -->
+  <div class="page" id="page-q6b">
+    <div class="card">
+      <div class="card-title">Q6B — risk + protective factors</div>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="meta-key">key term</div><div class="meta-val">EXPLAIN = HOW each factor increases/reduces risk</div></div>
+        <div class="meta-cell"><div class="meta-key">marks + time</div><div class="meta-val">4 marks · 8 minutes</div></div>
+        <div class="meta-cell"><div class="meta-key">structure</div><div class="meta-val">2 paragraphs (risk / protective)</div></div>
+      </div>
+      <div class="sec-label">para 1 — risk factors</div>
+      <ul class="pts">
+        <li><strong>Individual:</strong> family history of mental illness (genetic vulnerability); negative thinking; substance use (alcohol/cannabis impairs brain development)</li>
+        <li><strong>Social:</strong> cyberbullying + social isolation (removes protective peer connection); chronic HSC/ATAR stress</li>
+        <li><strong>Environmental:</strong> limited access to services in low-SES/rural areas → conditions go untreated + compound</li>
+      </ul>
+      <div class="sec-label">para 2 — protective factors</div>
+      <ul class="pts">
+        <li><strong>Individual:</strong> resilience + coping skills (exercise, mindfulness, help-seeking)</li>
+        <li><strong>Social:</strong> strong supportive family (notices early signs); sense of belonging (sport, cultural groups)</li>
+        <li><strong>Environmental:</strong> headspace (free/low-cost 12–25 year olds); inclusive school culture reducing stigma</li>
+      </ul>
+      <div class="impl-box">"An implication of this is that the more protective factors a young person has across individual, social, and environmental levels, the more effectively they offset the impact of risk factors on their mental health."</div>
+      <div class="tip-box">That final implication sentence is your 4/4 sentence. The relationship between risk and protective factors must be made explicit.</div>
+    </div>
+  </div>
+
+  <!-- Q7 — SUMMARISED / LOW PRIORITY -->
+  <div class="page" id="page-q7">
+    <div class="skip-card">
+      <div class="skip-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Q7 — low priority · only study if you have time left
+      </div>
+      <ul class="pts">
+        <li>Analyse question (8 marks) — only appears in 3 of the top 10 combos</li>
+        <li>If it shows up: write a short intro, then 3 body paragraphs — one per skill</li>
+        <li><strong>3 skills:</strong> Communication · Coping/stress management · Decision-making</li>
+        <li>Each paragraph formula: <span class="hl">define skill → how it protects YOUR mental health → how it helps OTHERS → end with "An implication of this is…"</span></li>
+        <li>Communication: expressing distress → early intervention; creates psychological safety for peers</li>
+        <li>Coping: mindfulness/exercise → manage academic stress; modelling healthy coping shifts peer norms</li>
+        <li>Decision-making: choosing headspace early; checking on withdrawn friends</li>
+        <li>If you get this question and haven't studied it: write anything structured with "An implication of this is…" at the end of each paragraph — that alone lifts your band</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="page" id="page-q8">
+    <div class="card">
+      <div class="card-title">Q8 — government, NGOs + communities</div>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="meta-key">key term</div><div class="meta-val">EXPLAIN = HOW each promotes health</div></div>
+        <div class="meta-cell"><div class="meta-key">marks + time</div><div class="meta-val">6 marks · 12 minutes</div></div>
+        <div class="meta-cell"><div class="meta-key">teacher fix</div><div class="meta-val">Every sentence = young people</div></div>
+      </div>
+      <div class="sec-label">para 1 — government</div>
+      <ul class="pts">
+        <li>Federal: National Mental Health Strategy; Medicare Better Access (10 subsidised psychology sessions)</li>
+        <li>Immunisation Program: protects young people from vaccine-preventable diseases</li>
+        <li>NSW: mandates PDHPE → every young person gets health education</li>
+        <li>Legislation: minimum drinking age, restrictions on junk food/alcohol ads targeting young people</li>
+      </ul>
+      <div class="sec-label">para 2 — NGOs</div>
+      <ul class="pts">
+        <li><span class="hl">headspace</span>: 150+ centres, free/low-cost for 12–25 yr olds, non-clinical youth-friendly setting</li>
+        <li><span class="hl">Beyond Blue</span>: anti-stigma campaigns targeting young males (most likely not to seek help)</li>
+        <li><span class="hl">ReachOut</span>: digital mental health resources designed for young Australians</li>
+        <li>Cancer Council / SunSmart: UV/skin cancer prevention for young Australians</li>
+      </ul>
+      <div class="sec-label">para 3 — communities</div>
+      <ul class="pts">
+        <li>Local councils: fund parks + youth spaces → physical activity + social connection for young people</li>
+        <li>Schools: counsellors, peer support, anti-bullying → protect mental health daily</li>
+        <li>Sporting clubs: physical activity + belonging → known protective factors for young people's mental health</li>
+      </ul>
+      <div class="tip-box">Every sentence must mention young people. Not "Medicare promotes health" — "Medicare gives young people access to subsidised psychology."</div>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="page" id="page-q9">
+    <div class="card">
+      <div class="card-title">Q9 — approaches to health <span class="badge badge-red">analyse · 8 marks</span></div>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="meta-key">key term</div><div class="meta-val">ANALYSE = implication sentence each para</div></div>
+        <div class="meta-cell"><div class="meta-key">marks + time</div><div class="meta-val">8 marks · 16 minutes</div></div>
+        <div class="meta-cell"><div class="meta-key">acronym</div><div class="meta-val">BASES: Biomedical / Behavioural / Socioenvironmental</div></div>
+      </div>
+      <div class="sec-label">para 1 — biomedical</div>
+      <ul class="pts">
+        <li>Health = absence of disease; diagnosis, treatment, cure</li>
+        <li>Influenced: vaccination programs (polio/measles eliminated); cancer screening (BreastScreen, bowel); Medicare</li>
+        <li>Limitation: reactive — treats after development; ignores social determinants; expensive</li>
+      </ul>
+      <div class="impl-box">"An implication of this is that relying on biomedical alone produces a system unable to prevent the chronic diseases now leading causes of death in Australia."</div>
+      <div class="sec-label">para 2 — behavioural / lifestyle</div>
+      <ul class="pts">
+        <li>Individual responsible through personal choices (diet, exercise, smoking, alcohol)</li>
+        <li>Influenced: Quit (smoking 30%→12%); SunSmart; Physical Activity Guidelines; Healthy Harold</li>
+        <li>Limitation: "victim blaming" — ignores structural barriers; works best for those who already have resources</li>
+      </ul>
+      <div class="impl-box">"An implication of this is that behavioural campaigns without structural change risk widening rather than closing health inequalities."</div>
+      <div class="sec-label">para 3 — socioenvironmental / Ottawa Charter (1986)</div>
+      <ul class="pts">
+        <li>Health shaped by social, economic, physical environments — not just biology/behaviour</li>
+        <li><strong>5 action areas:</strong> healthy public policy · supportive environments · community action · personal skills · reorient health services</li>
+        <li>Influenced: smoke-free laws; health-promoting schools; community health centres; National Mental Health Strategy</li>
+        <li>Most comprehensive — addresses root determinants not just symptoms</li>
+      </ul>
+      <div class="impl-box">"An implication of this is that the socioenvironmental approach is the most transformative, as it is the only one that directly attacks the conditions that produce illness in the first place."</div>
+      <div class="tip-box">Structure: short intro → 3 body paras. Each: define → Australian examples → limitation → implication. No implication = can't reach 7–8 band.</div>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="page" id="page-q10">
+    <div class="card">
+      <div class="card-title">Q10 — sustainable development goals <span class="badge badge-amber">high probability ⭐</span></div>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="meta-key">key term</div><div class="meta-val">EXPLAIN = HOW each SDG applied locally</div></div>
+        <div class="meta-cell"><div class="meta-key">marks + time</div><div class="meta-val">4 marks · 8 minutes</div></div>
+        <div class="meta-cell"><div class="meta-key">teacher fix</div><div class="meta-val">Name a SPECIFIC local community</div></div>
+      </div>
+      <div class="sec-label">para 1 — SDG 3: good health + well-being</div>
+      <ul class="pts">
+        <li>SDG 3 = ensure healthy lives + promote wellbeing for all at all ages</li>
+        <li>Local example: <span class="hl">rural NSW town</span> — fund headspace satellite centre so young people aged 12–25 get free mental health support without travelling to a city</li>
+        <li>Also: mobile dental clinics; culturally safe primary care for ATSI communities</li>
+        <li>Link: "directly improves physical, mental, social health of young people + closes rural–urban health gap"</li>
+      </ul>
+      <div class="sec-label">para 2 — SDG 4: quality education</div>
+      <ul class="pts">
+        <li>SDG 4 = inclusive, equitable, quality education + lifelong learning</li>
+        <li>Local example: <span class="hl">low-SES western Sydney suburb</span> — fund high-quality PDHPE + extra school counsellors</li>
+        <li>PDHPE builds health literacy → better decisions about nutrition, exercise, mental health</li>
+        <li>Long term: quality education → Year 12 → employment → higher SES → better health outcomes across life</li>
+      </ul>
+      <div class="tags">
+        <span class="tag tag-example">rural NSW town</span><span class="tag tag-example">western Sydney (low-SES)</span><span class="tag tag-example">remote ATSI community</span>
+      </div>
+      <div class="tip-box">The word LOCAL is everything. Name a specific community and show how the SDG works THERE. Generic national answers = max 2/4.</div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+const SYSTEM_PROMPT=`You are an expert NSW Health and Movement Science (HMS) teacher for Year 11. You know the entire AT1 content for "Health for Individuals and Communities" inside out.
+
+QUESTIONS AND MARKS:
+Q1 (3m): Describe physical and social dimensions of health that determine health status.
+Q2 (3m): Outline measures of epidemiology.
+Q3 (6m): Explain role of social justice principles (PEAR) in promoting individual AND community health.
+Q4 (6m): Explain how changes in young people's lives over recent generations influenced health status.
+Q5 (6m): Explain how determinants of health impact a young person's meaning of health.
+Q6A (4m): Describe nature and extent of ONE health issue (mental health — anxiety + depression).
+Q6B (4m): Explain risk factors and protective factors for that health issue.
+Q7 (8m): Analyse how 3 skills (communication, coping, decision-making) protect health of self and others.
+Q8 (6m): Explain role of government, NGOs and communities in promoting young people's health.
+Q9 (8m): Analyse how 3 approaches (biomedical, behavioural, socioenvironmental/Ottawa Charter) influenced health promotion.
+Q10 (4m): Explain how 2 SDGs (SDG 3 + SDG 4) promote young people's health in a LOCAL community.
+
+KEY TERMS: DESCRIBE=features+examples. OUTLINE=brief overview all parts+stat. EXPLAIN=cause and effect HOW. ANALYSE=depth+implications, every body paragraph ends "An implication of this is…"
+
+CRITICAL CONTENT:
+- Q3: PEAR=Participation,Equity,Access,Rights. Every principle links to BOTH individual AND community. Participation was missing from Anvi's draft.
+- Q7 skills: Communication, Coping, Decision-making. Para formula: define→protect self→protect others→"An implication of this is…"
+- Q9: BASES=Biomedical,Behavioural,Socioenvironmental. Ottawa Charter 1986, 5 action areas: healthy public policy, supportive environments, community action, personal skills, reorient health services.
+- Q10: MUST name a specific local community (rural NSW, western Sydney, ATSI).
+- Q4: MUST name generations (Baby Boomers, Gen X, Gen Z).
+- Q8: Every sentence links back to young people specifically.
+
+HEALTH ISSUE: Mental health (anxiety + depression).
+
+KEY STATS:
+- 1 in 4 young Australians (16-24) have mental health condition per year (AIHW)
+- Suicide = leading cause of death 15-24; young males 3x risk
+- 75% of mental health conditions develop before age 25
+- headspace: 150+ centres, free/low-cost for 12-25 year olds
+- Life expectancy ~83 years, infant mortality ~3/1000, CVD ~27% of deaths
+- Smoking: 30%→12% (Quit campaign)
+- Medicare Better Access: 10 subsidised psychology sessions per year
+
+TEACHER FEEDBACK on Anvi's draft: Q3 missing Participation; Q4 needs generation names; Q5 link explicitly to young people; Q6A needs stats; Q7+Q9 need implication sentences; Q8 keep young people as focus; Q10 needs specific local community.
+
+Be encouraging, practical, and concise. Always relate to what will get marks in the exam.`;
+
+const MARKING_GUIDES={
+  q1:{title:"Q1 — Dimensions of Health (3 marks)",question:"Describe the physical and social dimensions of health that determine an individual's health status.",guide:`3/3: Characteristics+features of BOTH dimensions + examples + links to determining health status.\n2/2: Sketches physical AND/OR social + may provide example.\n1/1: Some relevant information.\n\nCHECK FOR:\n- Physical described (body, fitness, weight, energy, disease-free)\n- Social described (relationships, support, belonging)\n- Example per dimension\n- Explicit link to "determining health status"\n- Two clear paragraphs`},
+  q2:{title:"Q2 — Epidemiology (3 marks)",question:"Outline the measures of epidemiology.",guide:`3/3: ALL measures outlined + examples.\n2/2: Some/all measures sketched.\n1/1: Names measures.\n\nCHECK FOR:\n- ALL FOUR: mortality, morbidity, infant mortality rate, life expectancy\n- Brief definition each\n- Australian stat each\n- Concise paragraph format`},
+  q3:{title:"Q3 — Social Justice Principles (6 marks)",question:"Explain the role of social justice principles in promoting an individual and community's health status.",guide:`6/6: Detailed explanation of ALL principles (PEAR) for BOTH individual AND community + examples.\n5/5: Sound explanation PEAR + examples.\n3-4/6: Describes role for individual AND/OR community.\n2/6: Outlines some principles.\n1/6: Some relevant information.\n\nCHECK FOR:\n- ALL FOUR: Participation, Equity, Access, Rights\n- Every principle → BOTH individual AND community health\n- Specific examples (Medicare, Close the Gap, NDIS)\n- HOW each promotes health (cause+effect)\n- 3 paragraphs`},
+  q4:{title:"Q4 — Changes in Young People's Lives (6 marks)",question:"Explain how the changes that have occurred in the lives of young people over recent generations have influenced their health status.",guide:`6/6: Detailed explanation HOW changes influenced health + examples.\n5/5: Sound explanation + examples.\n3-4/6: Describes changes + general health statement.\n2/6: Outlines some changes.\n1/6: Some information.\n\nCHECK FOR:\n- Every change linked to specific health outcome\n- Generations named (Baby Boomers/Gen X vs Gen Z)\n- Multiple changes covered\n- Cause-effect language throughout\n- Links to health status dimensions`},
+  q5:{title:"Q5 — Determinants + Meaning of Health (6 marks)",question:"Explain how the determinants of health impact on a young person's meaning of health.",guide:`6/6: Detailed explanation of range of determinants + young person's meaning + examples.\n5/5: Sound explanation + examples.\n3-4/6: Describes determinants + general meaning statement.\n2/6: Outlines some determinants.\n\nCHECK FOR:\n- Three categories: individual, socioeconomic, environmental\n- Each linked to HOW it shapes what health MEANS (not just affects)\n- Examples explicitly about young people\n- Contrasting examples (high vs low SES, urban vs rural)\n- "Meaning" language used`},
+  q6a:{title:"Q6A — Nature + Extent (4 marks)",question:"Describe the nature and extent of ONE health-related issue that affects young people.",guide:`4/4: Characteristics+features of BOTH nature AND extent + examples (stats).\n3/3: Sketches nature AND extent + examples.\n2/2: Nature AND/OR extent sketched.\n1/1: Some relevant information.\n\nCHECK FOR:\n- Para 1: Nature — what mental health is, anxiety symptoms, depression symptoms, dimensions affected\n- Para 2: Extent — SPECIFIC STATS (1 in 4, suicide leading cause 15-24, 75% before 25)\n- Sources named (AIHW, headspace)\n- About YOUNG AUSTRALIANS specifically\n- No stats = cannot reach 4/4`},
+  q6b:{title:"Q6B — Risk + Protective Factors (4 marks)",question:"Explain the risk factors and protective factors related to the health issue.",guide:`4/4: Relationship evident between risk AND protective factors + examples.\n3/3: Characteristics of both + examples.\n2/2: Sketches risk and/or protective factors.\n1/1: Some relevant information.\n\nCHECK FOR:\n- Both risk AND protective paragraphs\n- Risk: individual (genetics, substance use), social (cyberbullying, isolation), environmental (limited services)\n- Protective: individual (resilience, coping), social (family, belonging), environmental (headspace, school culture)\n- Everything linked to mental health + young people\n- Final sentence makes relationship explicit`},
+  q7:{title:"Q7 — Skills for the Individual (8 marks)",question:"Analyse how three skills for strengthening the individual can protect and enhance health and wellbeing of themselves and others.",guide:`7-8/8: Comprehensive analysis of THREE skills protecting self AND others + detailed examples.\n5-6/8: Detailed explanation of three skills + examples.\n3-4/8: Some skills described + general health statement.\n2/8: Some skills sketched.\n\nCHECK FOR:\n- Introduction before body paragraphs\n- THREE skills: communication, coping/stress management, decision-making\n- Each para: define → protect YOUR mental health + example → help OTHERS + example → "An implication of this is…"\n- WITHOUT implication sentences cannot reach 7-8 band\n- Self AND others addressed every paragraph\n- All examples tied to mental health`},
+  q8:{title:"Q8 — Government, NGOs + Communities (6 marks)",question:"Explain the role government and non-government organisations and communities have in promoting the health of young people.",guide:`6/6: Detailed explanation of government AND NGOs AND communities promoting young people's health + examples.\n5/5: Sound explanation all three + examples.\n3-4/6: Describes role of some groups.\n2/6: Outlines roles.\n\nCHECK FOR:\n- All THREE groups covered\n- HOW each promotes health (not just naming)\n- Every sentence links to young people\n- Examples: Medicare, PDHPE, headspace, Beyond Blue, ReachOut, councils, schools\n- Government covers federal AND state`},
+  q9:{title:"Q9 — Approaches to Health (8 marks)",question:"Analyse how three approaches to health have influenced health promotion.",guide:`7-8/8: Comprehensive analysis THREE approaches + detailed examples.\n5-6/8: Detailed explanation + examples.\n3-4/8: Some approaches described + general statement.\n2/8: Some approaches sketched.\n\nCHECK FOR:\n- Introduction paragraph\n- THREE approaches: biomedical, behavioural, socioenvironmental (Ottawa Charter 1986)\n- Each: define → Australian examples → limitation → "An implication of this is…"\n- Ottawa Charter 5 action areas named\n- Implication sentence ends EVERY body para\n- Australian campaigns named (Quit, SunSmart, vaccinations, smoke-free laws)`},
+  q10:{title:"Q10 — SDGs (4 marks)",question:"Explain how two Sustainable Development Goals could be used to promote the health of young people in a local community.",guide:`4/4: Explanation of TWO SDGs in LOCAL community + examples.\n3/3: SDG characteristics + examples.\n2/2: SDGs sketched.\n1/1: Some information.\n\nCHECK FOR:\n- TWO SDGs named + defined (SDG 3: Good Health; SDG 4: Quality Education)\n- LOCAL community named (rural NSW, western Sydney, ATSI)\n- HOW each SDG applied locally (cause+effect)\n- Linked to young people's health\n- Examples are local and specific`}
+};
+
+let apiKey='',chatHistory=[];
+
+document.getElementById('api-key-input').addEventListener('input',function(){
+  apiKey=this.value.trim();
+  document.getElementById('api-status').className='api-status'+(apiKey.length>10?' ok':'');
+});
+
+const titles={overview:'Overview',assess:'AI Response Assessor',chat:'AI Tutor Chat',stats:'Stats + Acronyms',q1:'Q1 — Dimensions of Health',q2:'Q2 — Epidemiology',q3:'Q3 — Social Justice Principles',q4:"Q4 — Changes in Young People's Lives",q5:"Q5 — Determinants + Meaning of Health",q6a:'Q6A — Nature + Extent',q6b:'Q6B — Risk + Protective Factors',q7:'Q7 — Skills (Low Priority)',q8:'Q8 — Govt, NGOs + Communities',q9:'Q9 — Approaches to Health',q10:'Q10 — SDGs'};
+
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const pg=btn.dataset.page;
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-'+pg).classList.add('active');
+    document.getElementById('topbar-title').textContent=titles[pg]||pg;
+  });
+});
+
+function updateCountdown(){
+  const target=new Date('2026-04-22T08:15:00+10:00');
+  const diff=target-new Date();
+  const el=document.getElementById('countdown');
+  if(diff<=0){el.textContent='NOW!';return;}
+  const h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+  el.textContent=h+'h '+String(m).padStart(2,'0')+'m '+String(s).padStart(2,'0')+'s';
+}
+updateCountdown();setInterval(updateCountdown,1000);
+
+async function callGemini(messages){
+  if(!apiKey)throw new Error('No API key');
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({systemInstruction:{parts:[{text:SYSTEM_PROMPT}]},contents:messages,generationConfig:{temperature:0.7,maxOutputTokens:1200}})
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||'API error '+res.status);}
+  const d=await res.json();
+  return d.candidates?.[0]?.content?.parts?.[0]?.text||'No response received.';
+}
+
+async function assessResponse(){
+  const qKey=document.getElementById('assess-q-select').value;
+  const userText=document.getElementById('assess-input').value.trim();
+  const resultEl=document.getElementById('assess-result');
+  const bodyEl=document.getElementById('assess-body');
+  const btn=document.getElementById('assess-btn');
+  resultEl.classList.add('visible');
+  if(!apiKey){bodyEl.innerHTML='<div style="color:var(--amber)">⚠ Enter your Gemini API key in the top bar first.</div>';return;}
+  if(!qKey){bodyEl.innerHTML='<div style="color:var(--amber)">⚠ Select a question from the dropdown.</div>';return;}
+  if(!userText){bodyEl.innerHTML='<div style="color:var(--amber)">⚠ Paste your response above.</div>';return;}
+  const guide=MARKING_GUIDES[qKey];
+  btn.disabled=true;
+  btn.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div> marking…';
+  bodyEl.innerHTML='<div style="color:var(--muted)">Gemini is reading your response…</div>';
+  const maxMarks=guide.title.match(/\((\d+)\s*marks?\)/i)?.[1]||'?';
+  const prompt=`You are marking a Year 11 NSW HMS exam response.\n\nQUESTION: ${guide.question}\nMAXIMUM MARKS: ${maxMarks}\n\n${guide.guide}\n\nSTUDENT'S RESPONSE:\n"""\n${userText}\n"""\n\nProvide feedback in this exact format:\n\nESTIMATED MARK: X / ${maxMarks}\n\nWHAT YOU DID WELL:\n• [specific strength 1]\n• [specific strength 2]\n\nWHAT NEEDS IMPROVEMENT:\n• [specific gap 1 + HOW to fix it]\n• [specific gap 2 + HOW to fix it]\n\nONE SENTENCE TO ADD:\n[Write one specific sentence to add that would improve their mark band]\n\nBe specific, practical, and encouraging.`;
+  try{
+    const result=await callGemini([{role:'user',parts:[{text:prompt}]}]);
+    bodyEl.textContent=result;
+  }catch(e){bodyEl.innerHTML=`<div style="color:var(--red)">Error: ${e.message}</div>`;}
+  btn.disabled=false;
+  btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg> mark my response';
+}
+
+async function sendChat(){
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim();
+  if(!text)return;
+  if(!apiKey){appendMsg('ai','⚠ Enter your Gemini API key in the top bar first.');return;}
+  input.value='';
+  appendMsg('user',text);
+  chatHistory.push({role:'user',parts:[{text}]});
+  const thinking=appendMsg('ai',null,true);
+  try{
+    const reply=await callGemini([...chatHistory]);
+    thinking.remove();
+    appendMsg('ai',reply);
+    chatHistory.push({role:'model',parts:[{text:reply}]});
+  }catch(e){thinking.remove();appendMsg('ai','Error: '+e.message);}
+  const msgs=document.getElementById('chat-messages');
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function appendMsg(role,text,loading=false){
+  const msgs=document.getElementById('chat-messages');
+  const div=document.createElement('div');div.className='msg '+role;
+  const av=document.createElement('div');av.className='msg-avatar';av.textContent=role==='user'?'A':'AI';
+  const bub=document.createElement('div');bub.className='msg-bubble';
+  if(loading)bub.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';
+  else bub.textContent=text;
+  div.appendChild(av);div.appendChild(bub);msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  return div;
+}
+
+function handleChatKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}
+}
+</script>
+</body>
+</html>
